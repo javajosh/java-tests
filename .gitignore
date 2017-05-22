@@ -1,4 +1,6 @@
-# Created by .ignore support plugin (hsz.mobi)
+java-tests-output.xml
+
+
 ### Emacs template
 # -*- mode: gitignore; -*-
 *~
@@ -33,6 +35,9 @@ tramp
 # cask packages
 .cask/
 
+### Maven
+
+target/
 
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion

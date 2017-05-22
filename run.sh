@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 mvn compile
-java -cp ./target/classes/ com.javajosh.javatests.Main
+java -ea -cp ./target/classes/ com.javajosh.javatests.Main
 
 cat << EOF
 *****************
