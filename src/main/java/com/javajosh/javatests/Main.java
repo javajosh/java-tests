@@ -45,6 +45,74 @@ public class Main {
     lambdas();
     enums();
     reflection();
+    tricks();
+    bubble();
+    exit();
+  }
+
+  private static void exit() {
+    //This test has to go last because it exits the system, to demonstrate that finally doesn't execute.
+    try{
+      Thread.sleep(1000);
+      System.exit(0); //finally will not execute.
+      throw new RuntimeException();
+    } catch (Throwable e){
+
+    } finally {
+      log("tricks/finally", "hello from the finally block");
+    }
+  }
+
+  /**
+   * Implement a bubble sort. Note this is O^n2, although this implementation hides that.
+   */
+  private static void bubble() {
+    int[] arr = {5,21,8,9,3,2};
+    int tmp;
+    boolean flag = true;
+
+    while(flag) {
+      flag = false;
+      for (int i = 0; i < arr.length-1; i++) {
+        if (arr[i] > arr[i+1]){
+          //swap
+          tmp = arr[i];
+          arr[i] = arr[i+1];
+          arr[i+1] = tmp;
+          flag = true;
+        }
+      }
+    }
+
+    log("bubble",  Arrays.toString(arr));
+
+  }
+
+  private static void tricks() {
+    assert Math.min(Double.MIN_VALUE, 0.0d) == 0.0d : "Unlike Integer.MIN_VALUE, Double.MIN_VALUE is very small, but positive (2^(-1074))";
+
+    assert 1.0/0.0 == Double.POSITIVE_INFINITY : "Double division by zero gives infinity, not an exception";
+
+    //swap two strings without a third variable
+    String a = "one";
+    String b = "two";
+
+    a = a + b;
+    b = a.substring(0, (a.length() - b.length()));
+    a = a.substring(b.length());
+    assert a.equals("two") && b.equals("one") : "a should be two and b should be one";
+
+
+    class A{
+      private int i = 0;
+      int get(){return this.i;}
+    }
+    class B extends A{
+      private int i = 1;
+    }
+
+    assert new B().get() == 0: "you can't override private or static fields, but you can hide the parent method";
+
   }
 
   private static void reflection() {
@@ -399,6 +467,26 @@ public class Main {
     char[] b = a.toCharArray();
     b[3] = 'X';
     log("strings", new String(b));
+
+    //How much faster is StringBuilder to StringBuffer?
+    //StringBuilder isn't synchronized, which is great if you're building a response in a single thread.
+    //On my machine I get 400ms vs 80ms, which is a factor of 5.
+    long start = System.currentTimeMillis();
+    StringBuffer sb = new StringBuffer();
+    int i = 10*1000*1000;
+    while (i-- > 0) sb.append('a');
+    long stop = System.currentTimeMillis();
+    log("strings", "StringBuffer duration was " + (stop - start));
+
+    start = System.currentTimeMillis();
+    StringBuilder sb2 = new StringBuilder();
+    i = 10*1000*1000;
+    while (i-- > 0) sb2.append('a');
+    stop = System.currentTimeMillis();
+    log("strings", "StringBuilder duration was " + (stop - start));
+
+
+    log("strings", "complete");
   }
 
 }
