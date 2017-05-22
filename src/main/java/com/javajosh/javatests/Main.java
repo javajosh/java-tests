@@ -2,10 +2,13 @@ package com.javajosh.javatests;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.time.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.LongAdder;
 import java.util.function.IntBinaryOperator;
 
 import static java.util.Arrays.asList;
@@ -26,13 +29,15 @@ import static java.util.stream.Collectors.toList;
 public class Main {
 
   static int count = 0;
+  static boolean showThreadLogs = false;
 
   public static void log(String method, String msg) {
+    if (method.startsWith("threads") && !showThreadLogs) return;
     System.out.printf("%d %2$s: %3$s \n", count++, method, msg);
   }
 
   public static void main(String[] args) {
-    log("main", "Welcome to Java Tests!");
+    log("main", "Welcome to Java Tests! showThreadLogs = " + showThreadLogs);
 
     initializers();
     loops();
@@ -47,7 +52,54 @@ public class Main {
     reflection();
     tricks();
     bubble();
+    adders();
+    dateTime();
+    kotlin();
     exit();
+  }
+
+  private static void kotlin() {
+
+  }
+
+
+  private static void dateTime() {
+    LocalDateTime a = LocalDateTime.now();
+
+    LocalDate b = LocalDate.of(2015, Month.APRIL, 10);
+    LocalDate c = LocalDate.ofYearDay(2017, 123);
+    LocalTime d = LocalTime.of(11, 48);
+    LocalTime e = LocalTime.parse("11:48");
+
+    LocalDate f = a.toLocalDate();
+    Month month = f.getMonth();
+    int second = a.getSecond();
+
+    LocalDateTime g = a.plusDays(10);
+
+    Period period = Period.of(0,9,0);
+    LocalDate h = f.plus(period);
+
+  }
+
+  /**
+   * New concurrent counters
+   */
+  private static void adders() {
+    //We used to use AtomicLongCounter - uses sun.misc.Unsafe underneath to compare and swap.
+    //Will spin under heavy contention.
+    AtomicLong counter = new AtomicLong();
+    counter.incrementAndGet();
+    counter.incrementAndGet();
+    assert counter.get() == 2L : "counter should be 2 but was " + counter.get();
+
+    //Now we use LongAdder - doesn't spin, just saves delta and adds it along with other writes.
+    //See: https://www.infoq.com/articles/Java-8-Quiet-Features/
+    LongAdder adder = new LongAdder();
+    adder.increment();
+    adder.increment();
+    assert adder.longValue() == 2L : "adder should be 2 but was " + adder.longValue();
+
   }
 
   private static void exit() {
@@ -181,6 +233,10 @@ public class Main {
     }
   }
 
+  /**
+   * Lot's of funky lambda stuff to test!
+   * https://docs.oracle.com/javase/tutorial/java/javaOO/lambdaexpressions.html
+   */
   private static void lambdas() {
 
     List<String> names = asList("Alice", "Bob", "Charlie");
@@ -374,6 +430,8 @@ public class Main {
 
     log("threads", "complete (first-pass)");
 
+    //TODO: Explore StampedLock.
+
   }
 
 
@@ -462,6 +520,7 @@ public class Main {
 
   private static void strings() {
     //Strings are stored in the heap, references in the stack.
+    //Prior to Java 1.7 interned strings were stored in permgen.
     String a = "This is stored in the heap.";
     //Character arrays are not stored in the heap, only in the stack
     char[] b = a.toCharArray();

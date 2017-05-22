@@ -25,6 +25,9 @@
         <module name="java-tests" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="java-tests" target="1.8" />
+    </bytecodeTargetLevel>
   </component>
 </project>
 
